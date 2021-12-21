@@ -268,16 +268,10 @@ where
 /// in the queue.
 #[derive(Encode, Decode, Clone, Eq, PartialEq, Debug, TypeInfo)]
 #[scale_info(skip_type_params(T))]
-pub struct ChargeAssetTxPayment {
-    /// The tip for the block author.
-    #[codec(compact)]
-    pub tip: u128,
-    /// The asset with which to pay the tip.
-    pub asset_id: Option<u32>,
-}
+pub struct ChargeTransactionPayment(#[codec(compact)] pub u128);
 
-impl SignedExtension for ChargeAssetTxPayment {
-    const IDENTIFIER: &'static str = "ChargeAssetTxPayment";
+impl SignedExtension for ChargeTransactionPayment {
+    const IDENTIFIER: &'static str = "ChargeTransactionPayment";
     type AccountId = u64;
     type Call = ();
     type AdditionalSigned = ();
@@ -336,7 +330,7 @@ impl<T: Config + Clone + Debug + Eq + Send + Sync> SignedExtra<T> for DefaultExt
         CheckMortality<T>,
         CheckNonce<T>,
         CheckWeight<T>,
-        ChargeAssetTxPayment,
+        ChargeTransactionPayment,
     );
     type Parameters = ();
 
@@ -363,10 +357,7 @@ impl<T: Config + Clone + Debug + Eq + Send + Sync> SignedExtra<T> for DefaultExt
             CheckMortality((Era::Immortal, PhantomData), self.genesis_hash),
             CheckNonce(self.nonce),
             CheckWeight(PhantomData),
-            ChargeAssetTxPayment {
-                tip: u128::default(),
-                asset_id: None,
-            },
+            ChargeTransactionPayment(u128::default()),
         )
     }
 }

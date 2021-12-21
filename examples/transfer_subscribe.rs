@@ -22,47 +22,47 @@
 //! polkadot --dev --tmp
 //! ```
 
-use sp_keyring::AccountKeyring;
-use subxt::{
-    ClientBuilder,
-    EventSubscription,
-    PairSigner,
-};
+// use sp_keyring::AccountKeyring;
+// use subxt::{
+//     ClientBuilder,
+//     EventSubscription,
+//     PairSigner,
+// };
 
-#[subxt::subxt(runtime_metadata_path = "examples/polkadot_metadata.scale")]
-pub mod polkadot {}
+// #[subxt::subxt(runtime_metadata_path = "examples/polkadot_metadata.scale")]
+// pub mod polkadot {}
 
 #[async_std::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    env_logger::init();
-
-    let signer = PairSigner::new(AccountKeyring::Alice.pair());
-    let dest = AccountKeyring::Bob.to_account_id().into();
-
-    let api = ClientBuilder::new()
-        .build()
-        .await?
-        .to_runtime_api::<polkadot::RuntimeApi<polkadot::DefaultConfig>>();
-
-    let sub = api.client.rpc().subscribe_events().await?;
-    let decoder = api.client.events_decoder();
-    let mut sub = EventSubscription::<polkadot::DefaultConfig>::new(sub, decoder);
-    sub.filter_event::<polkadot::balances::events::Transfer>();
-
-    api.tx()
-        .balances()
-        .transfer(dest, 10_000)
-        .sign_and_submit(&signer)
-        .await?;
-
-    let raw = sub.next().await.unwrap().unwrap();
-    let event = <polkadot::balances::events::Transfer as codec::Decode>::decode(
-        &mut &raw.data[..],
-    );
-    if let Ok(e) = event {
-        println!("Balance transfer success: value: {:?}", e.2);
-    } else {
-        println!("Failed to subscribe to Balances::Transfer Event");
-    }
+    // env_logger::init();
+    //
+    // // let signer = PairSigner::new(AccountKeyring::Alice.pair());
+    // // let dest = AccountKeyring::Bob.to_account_id().into();
+    // //
+    // // let api = ClientBuilder::new()
+    // //     .build()
+    // //     .await?
+    // //     .to_runtime_api::<polkadot::RuntimeApi<polkadot::DefaultConfig>>();
+    // //
+    // // let sub = api.client.rpc().subscribe_events().await?;
+    // // let decoder = api.client.events_decoder();
+    // // let mut sub = EventSubscription::<polkadot::DefaultConfig>::new(sub, decoder);
+    // // sub.filter_event::<polkadot::balances::events::Transfer>();
+    // //
+    // // api.tx()
+    // //     .balances()
+    // //     .transfer(dest, 10_000)
+    // //     .sign_and_submit(&signer)
+    // //     .await?;
+    // //
+    // // let raw = sub.next().await.unwrap().unwrap();
+    // // let event = <polkadot::balances::events::Transfer as codec::Decode>::decode(
+    // //     &mut &raw.data[..],
+    // // );
+    // // if let Ok(e) = event {
+    // //     println!("Balance transfer success: value: {:?}", e.2);
+    // // } else {
+    // //     println!("Failed to subscribe to Balances::Transfer Event");
+    // // }
     Ok(())
 }

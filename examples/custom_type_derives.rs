@@ -14,17 +14,17 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-#[subxt::subxt(
-    runtime_metadata_path = "examples/polkadot_metadata.scale",
-    generated_type_derives = "Clone, Debug"
-)]
-pub mod polkadot {}
+// #[subxt::subxt(
+//     runtime_metadata_path = "examples/polkadot_metadata.scale",
+//     generated_type_derives = "Clone, Debug"
+// )]
+// pub mod polkadot {}
 
-use polkadot::runtime_types::frame_support::PalletId;
+// use polkadot::runtime_types::frame_support::PalletId;
 
 #[async_std::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let pallet_id = PalletId([1u8; 8]);
-    let _ = <PalletId as Clone>::clone(&pallet_id);
+    // let pallet_id = PalletId([1u8; 8]);
+    // let _ = <PalletId as Clone>::clone(&pallet_id);
     Ok(())
 }

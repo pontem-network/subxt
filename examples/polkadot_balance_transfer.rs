@@ -22,34 +22,35 @@
 //! polkadot --dev --tmp
 //! ```
 
-use sp_keyring::AccountKeyring;
-use subxt::{
-    ClientBuilder,
-    PairSigner,
-};
+// use sp_keyring::AccountKeyring;
+// use subxt::{
+//     ClientBuilder,
+//     PairSigner,
+// };
 
-#[subxt::subxt(runtime_metadata_path = "examples/polkadot_metadata.scale")]
-pub mod polkadot {}
+// #[subxt::subxt(runtime_metadata_path = "examples/polkadot_metadata.scale")]
+// pub mod polkadot {}
 
 #[async_std::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    env_logger::init();
-
-    let signer = PairSigner::new(AccountKeyring::Alice.pair());
-    let dest = AccountKeyring::Bob.to_account_id().into();
-
-    let api = ClientBuilder::new()
-        .build()
-        .await?
-        .to_runtime_api::<polkadot::RuntimeApi<polkadot::DefaultConfig>>();
-    let hash = api
-        .tx()
-        .balances()
-        .transfer(dest, 10_000)
-        .sign_and_submit(&signer)
-        .await?;
-
-    println!("Balance transfer extrinsic submitted: {}", hash);
+    // env_logger::init();
+    //
+    // // @todo
+    // // let signer = PairSigner::new(AccountKeyring::Alice.pair());
+    // // let dest = AccountKeyring::Bob.to_account_id().into();
+    // //
+    // // let api = ClientBuilder::new()
+    // //     .build()
+    // //     .await?
+    // //     .to_runtime_api::<polkadot::RuntimeApi<polkadot::DefaultConfig>>();
+    // // let hash = api
+    // //     .tx()
+    // //     .balances()
+    // //     .transfer(dest, 10_000)
+    // //     .sign_and_submit(&signer)
+    // //     .await?;
+    // //
+    // // println!("Balance transfer extrinsic submitted: {}", hash);
 
     Ok(())
 }
