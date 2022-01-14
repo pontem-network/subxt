@@ -22,24 +22,54 @@
 //! polkadot --dev --tmp
 //! ```
 
-// use subxt::ClientBuilder;
+// mod metadata;
+use subxt::ClientBuilder;
 
-// #[subxt::subxt(runtime_metadata_path = "examples/polkadot_metadata.scale")]
-// pub mod polkadot {}
+/// metadata for encoding and decoding
+#[subxt::subxt(
+    runtime_metadata_path = "examples/metadata/pontem.scale",
+    generated_type_derives = "Clone, Debug"
+)]
+pub mod pontem {}
+
+/// Implementation of the missing "traits"
+const _: () = {
+    use pontem::runtime_types::polkadot_parachain::primitives::Id;
+
+    impl PartialEq for Id {
+        fn eq(&self, other: &Self) -> bool {
+            self.0 == other.0
+        }
+    }
+
+    impl Eq for Id {}
+
+    impl PartialOrd for Id {
+        fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+            self.0.partial_cmp(&other.0)
+        }
+    }
+
+    impl Ord for Id {
+        fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+            self.0.cmp(&other.0)
+        }
+    }
+};
 
 #[async_std::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // env_logger::init();
-    //
-    // let api = ClientBuilder::new()
-    //     .build()
-    //     .await?
-    //     .to_runtime_api::<polkadot::RuntimeApi<polkadot::DefaultConfig>>();
-    //
-    // let mut iter = api.storage().system().account_iter(None).await?;
-    //
-    // while let Some((key, account)) = iter.next().await? {
-    //     println!("{}: {}", hex::encode(key), account.data.free);
-    // }
+    env_logger::init();
+
+    let api = ClientBuilder::new()
+        .build()
+        .await?
+        .to_runtime_api::<pontem::RuntimeApi<pontem::DefaultConfig>>();
+
+    let mut iter = api.storage().system().account_iter(None).await?;
+
+    while let Some((key, account)) = iter.next().await? {
+        println!("{}: {}", hex::encode(key), account.data.free);
+    }
     Ok(())
 }
