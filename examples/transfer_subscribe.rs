@@ -23,14 +23,39 @@
 //! ```
 
 use sp_keyring::AccountKeyring;
-use subxt::{
-    ClientBuilder,
-    EventSubscription,
-    PairSigner,
-};
+use subxt::{ClientBuilder, EventSubscription, PairSigner};
 
-#[subxt::subxt(runtime_metadata_path = "examples/polkadot_metadata.scale")]
-pub mod polkadot {}
+/// metadata for encoding and decoding
+#[subxt::subxt(
+    runtime_metadata_path = "examples/metadata/pontem.scale",
+    generated_type_derives = "Clone, Debug"
+)]
+pub mod pontem {}
+
+/// Implementation of the missing "traits"
+const _: () = {
+    use pontem::runtime_types::polkadot_parachain::primitives::Id;
+
+    impl PartialEq for Id {
+        fn eq(&self, other: &Self) -> bool {
+            self.0 == other.0
+        }
+    }
+
+    impl Eq for Id {}
+
+    impl PartialOrd for Id {
+        fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+            self.0.partial_cmp(&other.0)
+        }
+    }
+
+    impl Ord for Id {
+        fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+            self.0.cmp(&other.0)
+        }
+    }
+};
 
 #[async_std::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -42,12 +67,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let api = ClientBuilder::new()
         .build()
         .await?
-        .to_runtime_api::<polkadot::RuntimeApi<polkadot::DefaultConfig>>();
+        .to_runtime_api::<pontem::RuntimeApi<pontem::DefaultConfig>>();
 
     let sub = api.client.rpc().subscribe_events().await?;
     let decoder = api.client.events_decoder();
-    let mut sub = EventSubscription::<polkadot::DefaultConfig>::new(sub, decoder);
-    sub.filter_event::<polkadot::balances::events::Transfer>();
+    let mut sub = EventSubscription::<pontem::DefaultConfig>::new(sub, decoder);
+    sub.filter_event::<pontem::balances::events::Transfer>();
 
     api.tx()
         .balances()
@@ -56,9 +81,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .await?;
 
     let raw = sub.next().await.unwrap().unwrap();
-    let event = <polkadot::balances::events::Transfer as codec::Decode>::decode(
-        &mut &raw.data[..],
-    );
+    let event =
+        <pontem::balances::events::Transfer as codec::Decode>::decode(&mut &raw.data[..]);
     if let Ok(e) = event {
         println!("Balance transfer success: value: {:?}", e.2);
     } else {

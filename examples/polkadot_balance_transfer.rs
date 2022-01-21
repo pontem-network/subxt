@@ -23,13 +23,39 @@
 //! ```
 
 use sp_keyring::AccountKeyring;
-use subxt::{
-    ClientBuilder,
-    PairSigner,
-};
+use subxt::{ClientBuilder, PairSigner};
 
-#[subxt::subxt(runtime_metadata_path = "examples/polkadot_metadata.scale")]
-pub mod polkadot {}
+/// metadata for encoding and decoding
+#[subxt::subxt(
+    runtime_metadata_path = "examples/metadata/pontem.scale",
+    generated_type_derives = "Clone, Debug"
+)]
+pub mod pontem {}
+
+/// Implementation of the missing "traits"
+const _: () = {
+    use pontem::runtime_types::polkadot_parachain::primitives::Id;
+
+    impl PartialEq for Id {
+        fn eq(&self, other: &Self) -> bool {
+            self.0 == other.0
+        }
+    }
+
+    impl Eq for Id {}
+
+    impl PartialOrd for Id {
+        fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+            self.0.partial_cmp(&other.0)
+        }
+    }
+
+    impl Ord for Id {
+        fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+            self.0.cmp(&other.0)
+        }
+    }
+};
 
 #[async_std::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -41,7 +67,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let api = ClientBuilder::new()
         .build()
         .await?
-        .to_runtime_api::<polkadot::RuntimeApi<polkadot::DefaultConfig>>();
+        .to_runtime_api::<pontem::RuntimeApi<pontem::DefaultConfig>>();
     let hash = api
         .tx()
         .balances()

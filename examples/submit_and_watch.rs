@@ -23,13 +23,36 @@
 //! ```
 
 use sp_keyring::AccountKeyring;
-use subxt::{
-    ClientBuilder,
-    PairSigner,
-};
+use subxt::{ClientBuilder, PairSigner};
 
-#[subxt::subxt(runtime_metadata_path = "examples/polkadot_metadata.scale")]
-pub mod polkadot {}
+/// metadata for encoding and decoding
+mod metadata;
+use metadata::pontem_mod::api as pontem;
+
+/// Implementation of the missing "traits"
+const _: () = {
+    use pontem::runtime_types::polkadot_parachain::primitives::Id;
+
+    impl PartialEq for Id {
+        fn eq(&self, other: &Self) -> bool {
+            self.0 == other.0
+        }
+    }
+
+    impl Eq for Id {}
+
+    impl PartialOrd for Id {
+        fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+            self.0.partial_cmp(&other.0)
+        }
+    }
+
+    impl Ord for Id {
+        fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+            self.0.cmp(&other.0)
+        }
+    }
+};
 
 #[async_std::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -52,7 +75,7 @@ async fn simple_transfer() -> Result<(), Box<dyn std::error::Error>> {
     let api = ClientBuilder::new()
         .build()
         .await?
-        .to_runtime_api::<polkadot::RuntimeApi<polkadot::DefaultConfig>>();
+        .to_runtime_api::<pontem::RuntimeApi<pontem::DefaultConfig>>();
 
     let balance_transfer = api
         .tx()
@@ -64,7 +87,7 @@ async fn simple_transfer() -> Result<(), Box<dyn std::error::Error>> {
         .await?;
 
     let transfer_event =
-        balance_transfer.find_first_event::<polkadot::balances::events::Transfer>()?;
+        balance_transfer.find_first_event::<pontem::balances::events::Transfer>()?;
 
     if let Some(event) = transfer_event {
         println!("Balance transfer success: value: {:?}", event.2);
@@ -84,7 +107,7 @@ async fn simple_transfer_separate_events() -> Result<(), Box<dyn std::error::Err
     let api = ClientBuilder::new()
         .build()
         .await?
-        .to_runtime_api::<polkadot::RuntimeApi<polkadot::DefaultConfig>>();
+        .to_runtime_api::<pontem::RuntimeApi<pontem::DefaultConfig>>();
 
     let balance_transfer = api
         .tx()
@@ -105,7 +128,7 @@ async fn simple_transfer_separate_events() -> Result<(), Box<dyn std::error::Err
     let events = balance_transfer.fetch_events().await?;
 
     let failed_event =
-        events.find_first_event::<polkadot::system::events::ExtrinsicFailed>()?;
+        events.find_first_event::<pontem::system::events::ExtrinsicFailed>()?;
 
     if let Some(_ev) = failed_event {
         // We found a failed event; the transfer didn't succeed.
@@ -114,7 +137,7 @@ async fn simple_transfer_separate_events() -> Result<(), Box<dyn std::error::Err
         // We didn't find a failed event; the transfer succeeded. Find
         // more details about it to report..
         let transfer_event =
-            events.find_first_event::<polkadot::balances::events::Transfer>()?;
+            events.find_first_event::<pontem::balances::events::Transfer>()?;
         if let Some(event) = transfer_event {
             println!("Balance transfer success: value: {:?}", event.2);
         } else {
@@ -135,7 +158,7 @@ async fn handle_transfer_events() -> Result<(), Box<dyn std::error::Error>> {
     let api = ClientBuilder::new()
         .build()
         .await?
-        .to_runtime_api::<polkadot::RuntimeApi<polkadot::DefaultConfig>>();
+        .to_runtime_api::<pontem::RuntimeApi<pontem::DefaultConfig>>();
 
     let mut balance_transfer_progress = api
         .tx()
@@ -157,7 +180,7 @@ async fn handle_transfer_events() -> Result<(), Box<dyn std::error::Error>> {
 
             let events = details.wait_for_success().await?;
             let transfer_event =
-                events.find_first_event::<polkadot::balances::events::Transfer>()?;
+                events.find_first_event::<pontem::balances::events::Transfer>()?;
 
             if let Some(event) = transfer_event {
                 println!(
@@ -178,7 +201,7 @@ async fn handle_transfer_events() -> Result<(), Box<dyn std::error::Error>> {
 
             let events = details.wait_for_success().await?;
             let transfer_event =
-                events.find_first_event::<polkadot::balances::events::Transfer>()?;
+                events.find_first_event::<pontem::balances::events::Transfer>()?;
 
             if let Some(event) = transfer_event {
                 println!("Balance transfer success: value: {:?}", event.2);

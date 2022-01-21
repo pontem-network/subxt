@@ -1,4 +1,4 @@
-# subxt &middot; ![build](https://github.com/paritytech/subxt/workflows/Rust/badge.svg) [![Latest Version](https://img.shields.io/crates/v/subxt.svg)](https://crates.io/crates/subxt) [![Documentation](https://docs.rs/subxt/badge.svg)](https://docs.rs/subxt)
+# subxt for Pontem
 
 A library to **sub**mit e**xt**rinsics to a [substrate](https://github.com/paritytech/substrate) node via RPC.
 
@@ -26,7 +26,7 @@ a different node then the `metadata` command accepts a `--url` argument.
 
 ### Generating the runtime API from the downloaded metadata
 
-Declare a module and decorate it with the `subxt` attribute which points at the downloaded metadata for the 
+Declare a module and decorate it with the `subxt` attribute which points at the downloaded metadata for the
 target runtime:
 
 ```rust
@@ -34,7 +34,7 @@ target runtime:
 pub mod node_runtime { }
 ```
 
-**Important:** `runtime_metadata_path` resolves to a path relative to the directory where your crate's `Cargo.toml` 
+**Important:** `runtime_metadata_path` resolves to a path relative to the directory where your crate's `Cargo.toml`
 resides ([`CARGO_MANIFEST_DIR`](https://doc.rust-lang.org/cargo/reference/environment-variables.html)), *not* relative to the source file.
 
 ### Initializing the API client
